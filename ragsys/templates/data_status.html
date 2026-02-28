@@ -1,0 +1,68 @@
+<!-- templates/data_status.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+  <h1 class="text-2xl font-bold mb-4">Indexing Data — Please Wait</h1>
+
+  <div id="status-message" class="mb-4">
+    <p class="text-yellow-600">Starting background task...</p>
+  </div>
+
+  <div class="mb-6">
+    <h2 class="text-lg font-semibold mb-2">Live Logs:</h2>
+    <pre id="logs"
+         class="p-4 bg-gray-900 text-green-400 text-sm rounded min-h-32 max-h-96 overflow-y-auto font-mono"
+         style="white-space: pre-wrap; word-wrap: break-word;"></pre>
+  </div>
+
+  <a id="back-link" href="{% url 'phoenix' %}" class="hidden mt-4 inline-block px-4 py-2 rounded bg-indigo-600 text-white">
+    ← Back to Admin
+  </a>
+
+  <script>
+    let lastLogLength = 0;
+
+    async function pollStatus() {
+      try {
+        const response = await fetch("{% url 'data_status_api' %}");
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+
+        // Update logs incrementally (optional: full replace is simpler)
+        const logsEl = document.getElementById('logs');
+        logsEl.textContent = data.logs;
+        logsEl.scrollTop = logsEl.scrollHeight; // auto-scroll
+
+        // Update status message
+        const statusEl = document.getElementById('status-message');
+        const backLink = document.getElementById('back-link');
+
+        if (data.status === 'ok') {
+          statusEl.innerHTML = `<p class="text-green-600">✅ Success! ${data.docs_indexed} documents indexed.</p>`;
+          backLink.classList.remove('hidden');
+          return; // stop polling
+        } else if (data.status === 'error') {
+          statusEl.innerHTML = `<p class="text-red-600">❌ Failed. Check logs below.</p>`;
+          backLink.classList.remove('hidden');
+          return;
+        } else {
+          statusEl.innerHTML = `<p class="text-yellow-600">🔄 Task is running in the background...</p>`;
+        }
+
+        // Poll again in 1 second
+        setTimeout(pollStatus, 1000);
+      } catch (error) {
+        console.error('Polling error:', error);
+        document.getElementById('status-message').innerHTML =
+          '<p class="text-red-600">⚠️ Could not fetch status. Check console.</p>';
+      }
+    }
+
+    // Start polling when page loads
+    document.addEventListener('DOMContentLoaded', pollStatus);
+  </script>
+</div>
+{% endblock %}

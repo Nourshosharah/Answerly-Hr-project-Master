@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Application</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .page {
+      display: none;
+      height: 100%;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    .chat-list-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .message-bubble {
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    
+    .scrollable {
+      overflow-y: auto;
+    }
+    
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body>
+  <div id="adminPage" class="page active">
+   <div class="min-h-full p-8" style="background-color: #f9fafb;">
+    <div class="max-w-4xl mx-auto">
+     <div class="mb-6 flex items-center justify-between">
+      <h1 class="text-4xl font-bold" style="color: #1f2937;">Admin Panel</h1><button id="backToChatBtn" class="px-6 py-3 rounded-lg font-semibold transition-colors" style="background-color: #667eea; color: #ffffff;"> ← Back to Chat </button>
+     </div>
+     <div class="rounded-xl shadow-lg p-8" style="background-color: #ffffff;">
+      <h2 class="text-2xl font-bold mb-6" style="color: #374151;">Application Statistics</h2>
+      <div class="grid grid-cols-3 gap-6 mb-8">
+       <div class="p-6 rounded-lg" style="background-color: #ede9fe;">
+        <p class="text-sm font-medium mb-1" style="color: #6b21a8;">Total Chats</p>
+        <p id="totalChats" class="text-3xl font-bold" style="color: #6b21a8;">0</p>
+       </div>
+       <div class="p-6 rounded-lg" style="background-color: #dbeafe;">
+        <p class="text-sm font-medium mb-1" style="color: #1e40af;">Total Messages</p>
+        <p id="totalMessages" class="text-3xl font-bold" style="color: #1e40af;">0</p>
+       </div>
+       <div class="p-6 rounded-lg" style="background-color: #d1fae5;">
+        <p class="text-sm font-medium mb-1" style="color: #065f46;">Active User</p>
+        <p id="activeUser" class="text-3xl font-bold" style="color: #065f46;">-</p>
+       </div>
+      </div>
+      <div class="border-t pt-8" style="border-color: #e5e7eb;">
+       <h3 class="text-xl font-bold mb-4" style="color: #374151;">Data Management</h3>
+       <p class="mb-4" style="color: #6b7280;">Clear all chat data and start fresh. This action will remove all messages and chat rooms.</p><button id="clearDataBtn" class="px-6 py-3 rounded-lg font-semibold transition-colors" style="background-color: #ef4444; color: #ffffff;"> <span id="clearBtnText">Clear All Data</span>
+        <div id="clearSpinner" class="loading-spinner mx-auto" style="display: none;"></div></button>
+       <div id="clearConfirm" class="mt-4 p-4 rounded-lg" style="background-color: #fef2f2; border: 2px solid #fca5a5; display: none;">
+        <p class="font-semibold mb-3" style="color: #991b1b;">Are you sure? This cannot be undone.</p>
+        <div class="flex space-x-3"><button id="confirmClearBtn" class="px-4 py-2 rounded font-medium" style="background-color: #ef4444; color: #ffffff;">Yes, Clear Everything</button> <button id="cancelClearBtn" class="px-4 py-2 rounded font-medium" style="background-color: #e5e7eb; color: #374151;">Cancel</button>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <a href="{% url 'trace_prepare' %}"
+   class="px-4 py-2 rounded bg-indigo-600 text-white">
+   🔍 Trace PrepareVectorDB
+</a>
+  </body>
+<script>
+document.getElementById('backToChatBtn').onclick = () => location.href='/chat/';
+/* wire the clear-data buttons as needed – same pattern */
+</script>

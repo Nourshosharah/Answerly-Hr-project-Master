@@ -1,0 +1,78 @@
+directories:
+  data_directory: "/home/rangpt/Documents/hr_system_eval_LDAP_copy/utils/data/docs"
+  data_directory_2: "/home/rangpt/Documents/hr_system_eval_LDAP/utils/data/docs2"
+  persist_directory: "/home/rangpt/Documents/hr_system_eval_LDAP_copy/utils/data/processed/chroma"
+  custom_persist_directory: "/home/rangpt/Documents/[Manal_Ans]Jina_with_Deep/data/vectordb/uploaded/chroma/"
+  media_url: "/uploaded_files/"
+
+enable_trulens_evaluation: true
+
+embedding_model_config:
+  engine: "/home/rangpt/Documents/LLM_Models/multilingual-e5-large"
+
+llm_config:
+  llm_system_role: >
+    You are an HR Policy Assistant operating within a Retrieval-Augmented Generation (RAG) system , your name is HR Answelry.
+    This system is in a testing and evaluation phase, so prioritize accuracy and precision.
+    Always respond in the user's language.
+
+    Output format (MANDATORY):
+    Return ONLY a valid JSON object with exactly these keys:
+    {"rationale_summary": "...", "final_answer": "...", "assumptions": ["..."]}
+    Do not include any text outside the JSON.
+
+    Rules:
+    1. Answer strictly based on the retrieved HR policy documents when relevant information exists.
+    2. You MUST always classify the source of your answer in "rationale_summary" using EXACTLY one of the following values:
+      - "Based on retrieved HR policy documents"
+      - "Based on general knowledge (not found in Syriatel policy files currenlty provided by Manal & Nour)"
+    3. If the answer is not supported by the retrieved documents, you MUST use the second value and rely only on general knowledge.
+    4. Do not mix sources or omit the source classification.
+
+    JSON guidance:
+    - "rationale_summary": Indicate whether the answer is policy-based or general knowledge.
+    - "final_answer": Clear, professional, and actionable.
+    - "assumptions": Only unavoidable assumptions due to missing policy information.
+
+  engine: "./my-20b-model"
+  temperature: 0.0
+  max_token: 4096
+
+summarizer_config:
+  max_final_token: 3000
+  character_overlap: 100
+  token_threshold: 0
+  summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to summarize and keep all the key information. Kepp the maximum length of summary within {} number of tokens."
+  final_summarizer_llm_system_role: "You are an expert text summarizer. You will receive a text and your task is to give a comprehensive summary and keep all the key information."
+
+splitter_config:
+  chunk_size: 1500
+  chunk_overlap: 500
+
+# NEW: Docling-specific configuration for PDF processing and ingestion
+docling_config:
+  # Token-based chunking parameters (for HybridChunker)
+  chunk_size: 512        # Max tokens per chunk (Docling works in tokens, not characters)
+  chunk_overlap: 75      # Token overlap between chunks
+  
+  # Docling pipeline options
+  artifacts_path: "/home/rangpt/Documents/hr_system_eval_LDAP/models/docling/"  # Path to Docling model artifacts (YOLO layout model, etc.)
+  embed_model_path: "/home/rangpt/Documents/LLM_Models/multilingual-e5-large"  # Tokenizer path (usually same as embedding model)
+  do_ocr: false           # Enable OCR for scanned PDFs (set true for image-based PDFs)
+  do_table_structure: false  # Extract detailed table structure (requires additional models)
+  ocr_languages: ["ar", "en"]  # Languages for OCR when do_ocr=true
+  num_threads: 4          # Parallel processing threads
+  device: "CPU"           # Device: "CPU", "CUDA", "MPS", or "AUTO"
+
+retrieval_config:
+  k: 6
+
+serve:
+  port: 8001
+
+memory:
+  number_of_q_a_pairs: 2
+
+cost:
+  input_per_1m: 0.5
+  output_per_1m: 1.5

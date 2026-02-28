@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="p-8">
+  <h1 class="text-2xl font-bold mb-4">Indexing requested</h1>
+
+  {% if status == 'ok' %}
+    <p class="text-green-600">
+      Task started successfully – {{ docs_indexed }} documents scheduled for indexing.
+    </p>
+    <p class="mt-2 text-sm text-gray-600">
+      The operation runs in the background; check the server console for progress.
+    </p>
+  {% else %}
+    <p class="text-red-600">Failed – check server logs.</p>
+  {% endif %}
+
+  <a class="mt-6 inline-block px-4 py-2 rounded bg-indigo-600 text-white"
+     href="{% url 'phoenix' %}">← Back to Admin</a>
+</div>
+{% endblock %}

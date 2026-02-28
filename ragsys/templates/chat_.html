@@ -1,0 +1,1513 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Answerly Hr{% endblock %}
+{% block content %}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --accent-primary: #3b82f6;
+        --accent-secondary: #8b5cf6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --border: #475569;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .container {
+        display: flex;
+        height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 320px;
+        background: var(--bg-secondary);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* User Profile Section */
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .user-info {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .user-email {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .logout-btn {
+        padding: 6px 12px;
+        background: var(--danger);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .logout-btn:hover {
+        background: #dc2626;
+    }
+
+    /* New Chat Button */
+    .new-chat-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .new-chat-btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Chat List */
+    .chat-list {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 16px;
+    }
+
+    .chat-list-item {
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        transition: background 0.2s;
+    }
+
+    .chat-list-item:hover, .chat-list-item.active {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    /* Response Detail Radio */
+    .display-mode-section {
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .display-mode-section label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+    .metric-card {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border: 1px solid var(--border);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-primary);
+    }
+
+    .metric-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .metric-name {
+        font-size: 14px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .metric-score {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .score-good { color: var(--success); }
+    .score-medium { color: var(--warning); }
+    .score-poor { color: var(--danger); }
+
+    .metric-bar {
+        height: 6px;
+        background: var(--bg-primary);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .metric-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 1s ease-out;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .metric-desc {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+
+    .overall-score {
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .overall-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+
+    .overall-value {
+        font-size: 36px;
+        font-weight: bold;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+
+    .status-ok {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--success);
+    }
+
+    .status-error {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--danger);
+    }
+
+    .status-warn {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--warning);
+    }
+
+    /* Admin Button */
+    .admin-btn {
+        width: 100%;
+        padding: 10px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: auto;
+    }
+
+    .admin-btn:hover {
+        background: var(--border);
+    }
+
+    /* Main Chat Area */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-primary);
+        min-width: 0;
+    }
+
+    .chat-header {
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-info h1 {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .header-info p {
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .message {
+        max-width: 80%;
+        padding: 16px 20px;
+        border-radius: 16px;
+        animation: fadeIn 0.3s ease-out;
+        line-height: 1.6;
+        word-wrap: break-word;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .message.bot {
+        align-self: flex-start;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-bottom-left-radius: 4px;
+    }
+
+    .message-header {
+        font-size: 12px;
+        margin-bottom: 6px;
+        opacity: 0.8;
+        font-weight: 600;
+    }
+
+    .typing-indicator {
+        display: none;
+        align-self: flex-start;
+        background: var(--bg-secondary);
+        padding: 20px;
+        border-radius: 16px;
+        border-bottom-left-radius: 4px;
+        gap: 4px;
+        margin-left: 20px;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--text-secondary);
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-10px); }
+    }
+
+    /* Thinking Timer */
+    .thinking-timer {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-secondary);
+        padding: 8px 16px;
+        background: var(--bg-tertiary);
+        border-radius: 20px;
+        margin: 0 auto;
+    }
+
+    .thinking-timer.active {
+        display: flex;
+    }
+
+    /* Quick Suggestions */
+    .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .suggest-btn {
+        padding: 8px 16px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        color: var(--text-primary);
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .suggest-btn:hover {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+    }
+
+    /* References Panel */
+    .refs-panel {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 16px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .refs-panel.active {
+        display: block;
+    }
+
+    .refs-title {
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--accent-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ref-card {
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--accent-primary);
+    }
+
+    .ref-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .ref-body {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        font-size: 13px;
+    }
+
+    .ref-meta {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        opacity: 0.8;
+    }
+
+    .ref-toggle {
+        background: transparent;
+        border: none;
+        color: var(--accent-primary);
+        cursor: pointer;
+        font-size: 12px;
+        padding: 4px 0;
+    }
+
+    .ref-toggle:hover {
+        text-decoration: underline;
+    }
+
+    .ref-full {
+        margin-top: 8px;
+    }
+
+    .ref-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0;
+        font-size: 12px;
+    }
+
+    .ref-table th, .ref-table td {
+        border: 1px solid var(--border);
+        padding: 6px 8px;
+        text-align: left;
+    }
+
+    .ref-table th {
+        background: var(--bg-primary);
+    }
+
+    .ref-card[dir="rtl"] .ref-table th, .ref-card[dir="rtl"] .ref-table td {
+        text-align: right;
+    }
+
+    /* Input Area */
+    .input-container {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    .settings {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .setting-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    select, input[type="range"] {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    input[type="range"] {
+        width: 100px;
+    }
+
+    .input-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+        border-color: var(--accent-primary);
+    }
+
+    textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 16px;
+        resize: none;
+        outline: none;
+        min-height: 24px;
+        max-height: 120px;
+        font-family: inherit;
+    }
+
+    textarea::placeholder {
+        color: var(--text-secondary);
+    }
+
+    .input-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    button {
+        background: var(--accent-primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    button:hover:not(:disabled) {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .icon-btn {
+        background: transparent;
+        color: var(--text-secondary);
+        padding: 8px;
+        border: 1px solid var(--border);
+    }
+
+    .icon-btn:hover:not(:disabled) {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+    }
+
+    .ref-btn {
+        background: var(--success);
+        padding: 8px 16px;
+    }
+
+    .ref-btn:hover {
+        background: #059669;
+    }
+
+    /* File Upload */
+    .file-upload {
+        margin-top: 12px;
+    }
+
+    .file-upload input[type="file"] {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    .view-reasoning-btn {
+        background: transparent;
+        border: 1px solid var(--accent-primary);
+        color: var(--accent-primary);
+        padding: 10px 16px;
+        font-size: 13px;
+        margin-top: 16px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .view-reasoning-btn:hover {
+        background: var(--accent-primary);
+        color: white;
+    }
+
+    /* Reasoning Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .close-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .close-btn:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    .reasoning-item {
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border-left: 4px solid var(--accent-primary);
+    }
+
+    .reasoning-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--accent-primary);
+        font-size: 14px;
+    }
+
+    .reasoning-text {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    /* Response Stats */
+    .response-stats {
+        display: none;
+        gap: 16px;
+        padding: 8px 16px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 12px;
+    }
+
+    .response-stats.active {
+        display: flex;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--bg-tertiary);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--border);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-top: 50px;
+        padding: 20px;
+    }
+
+    .empty-state svg {
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            left: -320px;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: left 0.3s;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .menu-toggle {
+            display: block !important;
+        }
+    }
+
+    .menu-toggle {
+        display: none;
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-size: 24px;
+        margin-right: 12px;
+    }
+</style>
+
+<div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            Answerly HR
+        </div>
+
+        <!-- User Profile -->
+        <div class="user-profile">
+            <div class="user-avatar">{{ user.name|first|upper }}</div>
+            <div class="user-info">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-email">{{ user.email }}</div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- New Chat Button -->
+        <button class="new-chat-btn" id="newChatBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Chat
+        </button>
+
+        <!-- Response Detail Radio -->
+        <div class="display-mode-section">
+            <label>Response Detail</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="displayMode" value="answer_only" checked>
+                    <span>Answer only</span>
+                </label>
+                <label>
+                    <input type="radio" name="displayMode" value="answer_assumptions">
+                    <span>Answer + assumptions</span>
+                </label>
+                <label>
+                    <input type="radio" name="displayMode" value="full">
+                    <span>Full reasoning</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div class="chat-list" id="chatList">
+            <!-- Dynamic chat list items -->
+        </div>
+
+        <!-- TruLens Status -->
+        {% if trulens_available %}
+        <div class="status-badge status-ok">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            TruLens Judge Online
+        </div>
+        {% else %}
+        <div class="status-badge status-error">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            TruLens Offline
+        </div>
+        {% endif %}
+
+        <!-- TruLens Metrics -->
+        <div id="metrics-container" style="display: none;">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-name">Context Relevance</span>
+                    <span id="ctx-rel-score" class="metric-score">-</span>
+                </div>
+                <div class="metric-bar">
+                    <div id="ctx-rel-bar" class="metric-fill" style="width: 0%"></div>
+                </div>
+                <p class="metric-desc">How relevant is retrieved context to the question?</p>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-name">Groundedness</span>
+                    <span id="grounded-score" class="metric-score">-</span>
+                </div>
+                <div class="metric-bar">
+                    <div id="grounded-bar" class="metric-fill" style="width: 0%"></div>
+                </div>
+                <p class="metric-desc">Is the answer supported by the context? (Anti-hallucination)</p>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-name">Answer Relevance</span>
+                    <span id="ans-rel-score" class="metric-score">-</span>
+                </div>
+                <div class="metric-bar">
+                    <div id="ans-rel-bar" class="metric-fill" style="width: 0%"></div>
+                </div>
+                <p class="metric-desc">Does the answer address the question asked?</p>
+            </div>
+
+            <div class="overall-score">
+                <div class="overall-label">Overall RAG Score</div>
+                <div id="overall-score" class="overall-value">-</div>
+            </div>
+
+            <button class="view-reasoning-btn" onclick="showReasoning()" id="reasoning-btn" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+                View Reasoning
+            </button>
+        </div>
+
+        <!-- Admin Button -->
+        <button class="admin-btn" id="adminBtn" {% if user.role != 'hr' %}style="display: none;"{% endif %}>
+            ⚙️ Admin Settings
+        </button>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="main-content">
+        <header class="chat-header">
+            <div style="display: flex; align-items: center;">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="header-info">
+                    <h1>Chat with Documents</h1>
+                    <p>Welcome, {{ user.name }} </p>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item" title="Response time">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span id="latency">0s</span>
+                </div>
+                <div class="stat-item" title="Token usage">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span id="tokens">0 tokens</span>
+                </div>
+                <div class="stat-item" title="Estimated cost">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span id="cost">$0.000000</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="chat-container" id="chat-container">
+            <!-- Welcome message -->
+            <div class="message bot">
+                <div class="message-header">Assistant</div>
+                Hello <strong>{{ user.name }}</strong>! I'm your HR assistant .
+                Ask me anything about policies and I'll provide answers with real-time quality metrics.
+                {% if not trulens_available %}
+                <br><br><em style="color: var(--warning)">⚠️ TruLens judge is currently offline. Evaluation metrics will not be available.</em>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Thinking Timer -->
+        <div class="thinking-timer" id="thinkingTimer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Thinking for <span id="timerSeconds">0</span>s…
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+
+        <div class="refs-panel" id="refs-panel">
+            <div class="refs-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Retrieved Context
+            </div>
+            <div id="refs-content"></div>
+        </div>
+
+        <div class="input-container">
+            <!-- Quick Suggestions -->
+            <div class="suggestions">
+                <button type="button" class="suggest-btn">What is the needed notice period?</button>
+                <button type="button" class="suggest-btn">Can I add my 4th child to my medical plan?</button>
+                <button type="button" class="suggest-btn">What is the overtime payment for working on my day off?</button>
+                <button type="button" class="suggest-btn">هل يمكنني استقبال ضيوف في المكتب بدون إذن مسبق؟</button>
+            </div>
+
+            <form id="messageForm">
+                <div class="input-wrapper">
+                    <textarea
+                        id="message-input"
+                        placeholder="Type your question…"
+                        rows="1"
+                        required
+                    ></textarea>
+                    <div class="input-actions">
+                        <button type="button" class="icon-btn ref-btn" id="refBtn" title="Show references">
+                            📎
+                        </button>
+                        <button type="button" class="icon-btn" onclick="clearChat()" title="Clear chat">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                        <button type="submit" id="send-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Response Stats -->
+            <div class="response-stats" id="responseStats">
+                Responded in <span id="finalLatency"></span>s |
+                Tokens: <span id="totalTokens"></span> |
+                Cost: $<span id="estimatedCost"></span>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<!-- Reasoning Modal -->
+<div class="modal" id="reasoning-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>TruLens Evaluation Reasoning</h2>
+            <button class="close-btn" onclick="closeReasoning()">&times;</button>
+        </div>
+        <div id="reasoning-content"></div>
+    </div>
+</div>
+
+<!-- Tiny Markdown Parser -->
+<script>
+(function(){
+    const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const tableRow = s => s.trim().split('|').map(c => c.trim()).filter(Boolean);
+    window.marked = { parse: md => {
+        let h = md.replace(/\r\n/g, '\n');
+        h = h.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
+        h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+        h = h.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        // Tables
+        for (let i = 0; i < 2; i++) {
+            h = h.replace(/^\s*\|(.+)\n\s*\|([- :|]+)\n((?:\|.+\n?)+)/gm, (_, head, div, body) => {
+                const headCells = tableRow(head).map(c => `<th>${esc(c)}</th>`).join('');
+                const rows = body.trim().split('\n').map(r => {
+                    const cells = tableRow(r).map(c => `<td>${esc(c)}</td>`).join('');
+                    return `<tr>${cells}</tr>`;
+                }).join('');
+                return `<table class="ref-table"><thead><tr>${headCells}</tr></thead><tbody>${rows}</tbody></table>`;
+            });
+        }
+        h = h.split('\n\n').map(p => p.startsWith('<') ? p : `<p>${p}</p>`).join('');
+        return h;
+    }};
+})();
+</script>
+
+<script>
+    // CSRF Token
+    const csrf = document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1] || '{{ csrf_token }}';
+
+    // Current reasoning for modal
+    let currentReasoning = {};
+    let thinkingTimer = null;
+    let thinkingSeconds = 0;
+
+    // Temperature slider
+    document.getElementById('temperature').addEventListener('input', function(e) {
+        document.getElementById('temp-value').textContent = e.target.value;
+    });
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('message-input');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Enter to send, Shift+Enter for new line
+    textarea.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Form submit
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        sendMessage();
+    });
+
+    // Quick suggestion clicks
+    document.addEventListener('click', e => {
+        if (!e.target.classList.contains('suggest-btn')) return;
+        document.getElementById('message-input').value = e.target.textContent.trim();
+        document.getElementById('message-input').focus();
+    });
+
+    // Toggle ref cards (show more/less)
+    document.addEventListener('click', e => {
+        if (!e.target.classList.contains('ref-toggle')) return;
+        const full = e.target.nextElementSibling;
+        full.classList.toggle('hidden');
+        e.target.textContent = full.classList.contains('hidden') ? 'Show more' : 'Show less';
+    });
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function startThinkingTimer() {
+        thinkingSeconds = 0;
+        const timerEl = document.getElementById('timerSeconds');
+        const thinkingEl = document.getElementById('thinkingTimer');
+        timerEl.textContent = thinkingSeconds;
+        thinkingEl.classList.add('active');
+        thinkingTimer = setInterval(() => {
+            thinkingSeconds++;
+            timerEl.textContent = thinkingSeconds;
+        }, 1000);
+    }
+
+    function stopThinkingTimer() {
+        if (thinkingTimer) {
+            clearInterval(thinkingTimer);
+            thinkingTimer = null;
+        }
+        document.getElementById('thinkingTimer').classList.remove('active');
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const enableEval = document.getElementById('enable-eval').checked;
+        const statsEl = document.getElementById('responseStats');
+
+        // Add user message immediately
+        appendMessage(message, 'user');
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Show loading
+        sendBtn.disabled = true;
+        typingIndicator.classList.add('active');
+        statsEl.classList.remove('active');
+        startThinkingTimer();
+
+        try {
+            const response = await fetch("{% url 'api_chat_with_eval' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf
+                },
+                body: JSON.stringify({
+                    message: message,
+                    data_type: document.getElementById('data-type').value,
+                    temperature: parseFloat(document.getElementById('temperature').value),
+                    display_mode: document.querySelector('input[name="displayMode"]:checked').value,
+                    evaluate: enableEval
+                })
+            });
+
+            stopThinkingTimer();
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Request failed');
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Add bot response
+            appendHTML(data.bot_html);
+
+            // Update references (store for ref button)
+            if (data.refs_html) {
+                window.lastRefsHtml = data.refs_html;
+            }
+
+            // Update header stats
+            document.getElementById('latency').textContent = data.latency_sec + 's';
+            document.getElementById('tokens').textContent = (data.total_tokens || 0) + ' tokens';
+            document.getElementById('cost').textContent = '$' + (data.estimated_cost_usd || 0).toFixed(6);
+
+            // Update footer stats
+            document.getElementById('finalLatency').textContent = data.latency_sec;
+            document.getElementById('totalTokens').textContent = data.total_tokens || 0;
+            document.getElementById('estimatedCost').textContent = (data.estimated_cost_usd || 0).toFixed(6);
+            statsEl.classList.add('active');
+
+            // Update TruLens metrics
+            if (data.trulens && data.trulens.status === 'success') {
+                updateMetrics(data.trulens.metrics);
+            } else if (data.trulens && data.trulens.error) {
+                console.warn('TruLens evaluation failed:', data.trulens.error);
+                showMetricsError();
+            }
+
+        } catch (error) {
+            stopThinkingTimer();
+            console.error('Chat error:', error);
+            appendMessage('Error: ' + error.message, 'bot', true);
+        } finally {
+            typingIndicator.classList.remove('active');
+            sendBtn.disabled = false;
+        }
+    }
+
+    function appendMessage(text, sender, isError = false) {
+        const container = document.getElementById('chat-container');
+        const div = document.createElement('div');
+        div.className = `message ${sender}`;
+        if (isError) div.style.borderColor = 'var(--danger)';
+
+        const header = sender === 'user' ? 'You' : 'Assistant';
+        const isRtl = /[\u0600-\u06FF]/.test(text);
+        div.dir = isRtl ? 'rtl' : 'ltr';
+        div.innerHTML = `<div class="message-header">${header}</div>${escapeHtml(text)}`;
+
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function appendHTML(html) {
+        const container = document.getElementById('chat-container');
+        const botHtml = marked.parse(html);
+        const div = document.createElement('div');
+        div.className = 'message bot';
+        div.innerHTML = `<div class="message-header">Assistant</div>${botHtml}`;
+        div.dir = /[\u0600-\u06FF]/.test(botHtml) ? 'rtl' : 'ltr';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Beautify references with collapsible cards
+    function beautifyRefs(md) {
+        if (!md) return "";
+        const esc = str => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return md.split(/^# /gm).filter(Boolean).map(block => {
+            const lines = block.split('\n').filter(l => l.trim() !== '');
+            const title = lines[0];
+            const metaLine = lines[lines.length - 1];
+            const bodyMd = lines.slice(1, -1).join('\n');
+            const bodyHtml = window.marked.parse(bodyMd);
+            const fullText = title + bodyHtml;
+            const isRtl = /[\u0600-\u06FF]/.test(fullText);
+            const previewLen = 400;
+            const needsMore = bodyHtml.length > previewLen;
+            let displayHtml = bodyHtml;
+            if (needsMore) displayHtml = bodyHtml.slice(0, previewLen) + '…';
+            return `
+                <div class="ref-card" ${isRtl ? 'dir="rtl"' : ''}>
+                    <div class="ref-title">${esc(title)}</div>
+                    <div class="ref-body">${displayHtml}</div>
+                    ${needsMore ? `<button class="ref-toggle">Show more</button><div class="ref-full hidden">${bodyHtml}</div>` : ''}
+                    <div class="ref-meta">${esc(metaLine)}</div>
+                </div>`;
+        }).join('');
+    }
+
+    // References button click
+    document.getElementById('refBtn').addEventListener('click', async () => {
+        const panel = document.getElementById('refs-panel');
+        const content = document.getElementById('refs-content');
+
+        if (!panel.classList.contains('active')) {
+            // Fetch refs from API
+            try {
+                const resp = await fetch("{% url 'api_refs' %}", {
+                    method: 'GET',
+                    headers: { 'X-CSRFToken': csrf }
+                });
+                const data = await resp.json();
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                content.innerHTML = beautifyRefs(data.refs_html);
+                panel.classList.add('active');
+                panel.scrollIntoView({ behavior: 'smooth' });
+            } catch (e) {
+                console.error('Failed to fetch references:', e);
+            }
+        } else {
+            panel.classList.remove('active');
+        }
+    });
+
+    function updateMetrics(metrics) {
+        document.getElementById('metrics-placeholder').style.display = 'none';
+        document.getElementById('metrics-container').style.display = 'block';
+        document.getElementById('reasoning-btn').style.display = 'flex';
+
+        // Store reasoning for modal
+        currentReasoning = metrics.reasoning || {};
+
+        // Update with animation delay
+        setTimeout(() => {
+            updateScore('ctx-rel', metrics.context_relevance);
+            updateScore('grounded', metrics.groundedness);
+            updateScore('ans-rel', metrics.relevance);
+            updateScore('overall', metrics.overall_score);
+        }, 100);
+    }
+
+    function updateScore(id, score) {
+        const percentage = (score * 100).toFixed(1);
+        const bar = document.getElementById(id + '-bar');
+        const display = document.getElementById(id === 'overall' ? 'overall-score' : id + '-score');
+
+        if (bar) bar.style.width = percentage + '%';
+
+        if (id !== 'overall' && display) {
+            display.textContent = percentage + '%';
+            display.className = 'metric-score ' + getScoreClass(score);
+        } else if (display) {
+            display.textContent = percentage + '%';
+        }
+    }
+
+    function getScoreClass(score) {
+        if (score >= 0.7) return 'score-good';
+        if (score >= 0.4) return 'score-medium';
+        return 'score-poor';
+    }
+
+    function showMetricsError() {
+        document.getElementById('metrics-placeholder').innerHTML = `
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 16px; opacity: 0.3;">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <p>Evaluation failed. Check console for details.</p>
+        `;
+    }
+
+    function showReasoning() {
+        const modal = document.getElementById('reasoning-modal');
+        const content = document.getElementById('reasoning-content');
+
+        const items = [
+            { key: 'context_relevance', title: 'Context Relevance Analysis' },
+            { key: 'groundedness', title: 'Groundedness Analysis' },
+            { key: 'relevance', title: 'Answer Relevance Analysis' }
+        ];
+
+        content.innerHTML = items.map(item => `
+            <div class="reasoning-item">
+                <div class="reasoning-title">${item.title}</div>
+                <div class="reasoning-text">${currentReasoning[item.key] || 'No reasoning available'}</div>
+            </div>
+        `).join('');
+
+        modal.classList.add('active');
+    }
+
+    function closeReasoning() {
+        document.getElementById('reasoning-modal').classList.remove('active');
+    }
+
+    async function clearChat() {
+        if (!confirm('Clear all chat history?')) return;
+
+        try {
+            const response = await fetch('/api/clear/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrf }
+            });
+
+            if (response.ok) {
+                document.getElementById('chat-container').innerHTML = `
+                    <div class="message bot">
+                        <div class="message-header">Assistant</div>
+                        Chat history cleared. How can I help you?
+                    </div>
+                `;
+                document.getElementById('refs-panel').classList.remove('active');
+                document.getElementById('metrics-container').style.display = 'none';
+                document.getElementById('metrics-placeholder').style.display = 'block';
+                document.getElementById('reasoning-btn').style.display = 'none';
+                document.getElementById('responseStats').classList.remove('active');
+            }
+        } catch (e) {
+            console.error('Failed to clear chat:', e);
+        }
+    }
+
+    // Close modal on outside click
+    document.getElementById('reasoning-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeReasoning();
+    });
+
+    // Navigation
+    document.getElementById('logoutBtn').onclick = () => location.href = '{% url "logout" %}';
+    document.getElementById('adminBtn').onclick = () => location.href = '{% url "admin_panel" %}';
+    document.getElementById('newChatBtn').onclick = () => {
+        clearChat();
+    };
+</script>
+{% endblock %}

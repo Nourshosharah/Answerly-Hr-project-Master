@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Phoenix Telemetry{% endblock %}
+
+{% block content %}
+  <div class="w-full h-full flex flex-col">
+    <!-- Optional header -->
+    <header class="bg-gray-800 text-white p-4 shadow">
+      <h1 class="text-xl font-semibold">Phoenix Telemetry Dashboard</h1>
+    </header>
+
+    <!-- Iframe fills remaining vertical space -->
+    <iframe
+      src="http://0.0.0.0:6006"
+      class="flex-1 w-full border-0"
+      title="Phoenix UI"
+    ></iframe>
+  </div>
+{% endblock %}

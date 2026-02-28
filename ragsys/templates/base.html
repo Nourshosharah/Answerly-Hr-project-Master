@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HR RAG System{% endblock %}</title>
+
+  {% load static %}
+  <!-- Tailwind -->
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <link rel="stylesheet" href="{% static 'vendor/tailwind.css' %}?">
+
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'main.css' %}">
+
+  <style>
+    html,body{height:100%;margin:0;padding:0;box-sizing:border-box}
+    .page{display:none;height:100%}
+    .page.active{display:block}
+    .loading-spinner{
+      border:3px solid rgba(255,255,255,.3);
+      border-top:3px solid #fff;
+      border-radius:50%;width:24px;height:24px;
+      animation:spin 1s linear infinite
+    }
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    @view-transition{navigation:auto}
+  </style>
+</head>
+
+<body>
+  <!-- PAGE CONTENT INSERTED HERE -->
+  {% block content %}{% endblock %}
+
+  <!-- Shared JS -->
+  <script src="{% static '_sdk/data_sdk.js' %}"></script>
+  <script src="{% static '_sdk/element_sdk.js' %}"></script>
+  <script src="{% static 'main.js' %}"></script>
+</body>
+</html>

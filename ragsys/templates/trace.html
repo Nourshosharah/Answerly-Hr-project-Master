@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Trace PrepareVectorDB{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="p-8 max-w-5xl mx-auto">
+  <h1 class="text-3xl font-bold mb-2">🔍 Trace every step of PrepareVectorDB</h1>
+  <p class="text-gray-600 mb-6">Choose PDF(s) → click buttons left→right.  Logs appear below.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <input id="pdfPath" type="text" placeholder="e.g. data/docs" value="data/docs"
+           class="px-3 py-2 border rounded">
+    <select id="embedName" class="px-3 py-2 border rounded">
+      <option>sentence-transformers/all-MiniLM-L6-v2</option>
+      <option>sentence-transformers/all-mpnet-base-v2</option>
+    </select>
+    <input id="chunkSize"  type="number" value="1000" class="px-3 py-2 border rounded">
+    <input id="chunkOverlap" type="number" value="200" class="px-3 py-2 border rounded">
+  </div>
+
+  <div class="grid grid-cols-4 gap-3 mb-6">
+    <button onclick="runStep('load')"  class="px-4 py-2 bg-indigo-600 text-white rounded">1️⃣ Load PDFs</button>
+    <button onclick="runStep('clean')" class="px-4 py-2 bg-indigo-600 text-white rounded">2️⃣ Clean & OCR</button>
+    <button onclick="runStep('chunk')" class="px-4 py-2 bg-indigo-600 text-white rounded">3️⃣ Chunk</button>
+    <button onclick="runStep('store')" class="px-4 py-2 bg-indigo-600 text-white rounded">4️⃣ Embed & Store</button>
+  </div>
+
+  <!-- Console -->
+  <div class="border rounded-lg bg-gray-50 p-4 h-80 overflow-y-auto font-mono text-sm" id="console">
+    <div class="text-gray-400">Logs will appear here...</div>
+  </div>
+
+  <a class="mt-6 inline-block px-4 py-2 rounded bg-gray-700 text-white"
+     href="{% url 'admin_panel' %}">← Back to Admin</a>
+</div>
+
+<script>
+const csrf = document.cookie.split('; ').find(r => r.startsWith('csrftoken'))?.split('=')[1];
+
+async function runStep(step) {
+  const payload = new FormData();
+  payload.append("pdf_path", document.getElementById('pdfPath').value);
+  payload.append("embed_name", document.getElementById('embedName').value);
+  payload.append("chunk_size", document.getElementById('chunkSize').value);
+  payload.append("chunk_overlap", document.getElementById('chunkOverlap').value);
+
+  const res = await fetch(`/trace/api/${step}/`, {
+
+    method : 'POST',
+    headers: {'X-CSRFToken': csrf},
+    body   : payload
+  });
+  const data = await res.json();
+  const box = document.getElementById('console');
+  box.innerHTML = data.console.replace(/\n/g, '<br>');
+  box.scrollTop = box.scrollHeight;
+}
+</script>
+{% endblock %}

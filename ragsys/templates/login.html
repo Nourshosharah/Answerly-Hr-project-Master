@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Answerly HR - Login</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #475569;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    .login-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      background: var(--bg-tertiary);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+    }
+
+    .login-form {
+      display: none;
+    }
+
+    .login-form.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 15px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+
+    .error-message {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .info-box p {
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .info-box strong {
+      color: var(--text-primary);
+    }
+
+    .helper-text {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .helper-text a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .helper-text a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 24px;
+      }
+      
+      .logo {
+        font-size: 28px;
+      }
+    }
+
+    input.error {
+      border-color: var(--danger);
+    }
+
+    input.error:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    input[name="csrfmiddlewaretoken"] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="logo-section">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        Answerly HR
+      </div>
+      <div class="subtitle">Connect and chat with your HR policies</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-tabs">
+        <button class="tab-btn active" onclick="switchTab('hardcoded')">Hardcoded</button>
+        <button class="tab-btn" onclick="switchTab('ldap')">LDAP Login</button>
+      </div>
+
+      <form id="hardcodedForm" class="login-form active" onsubmit="return false;">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="username">
+          <div id="usernameError" class="error-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="email">
+          <div id="emailError" class="error-message"></div>
+        </div>
+
+        <button type="submit" id="hardcodedBtn" class="submit-btn">
+          <span>Sign In</span>
+          <div class="loading-spinner"></div>
+        </button>
+      </form>
+
+      <form id="ldapForm" class="login-form" onsubmit="return false;">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="ldapUsername">LDAP Username</label>
+          <input type="text" id="ldapUsername" name="ldap_username" placeholder="Enter your LDAP username" autocomplete="username">
+          <div id="ldapUsernameError" class="error-message"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="ldapPassword">LDAP Password</label>
+          <input type="password" id="ldapPassword" name="password" placeholder="Enter your LDAP password" autocomplete="current-password">
+          <div id="ldapPasswordError" class="error-message"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="ldapEmail">Email (optional)</label>
+          <input type="email" id="ldapEmail" name="email" placeholder="Enter your email (optional)" autocomplete="email">
+          <div id="ldapEmailError" class="error-message"></div>
+        </div>
+
+        <button type="submit" id="ldapBtn" class="submit-btn">
+          <span>Sign In with LDAP</span>
+          <div class="loading-spinner"></div>
+        </button>
+      </form>
+
+      <div class="info-box">
+        <p>
+          <strong>Demo Accounts:</strong><br>
+          - <strong>Employee:</strong> username: <code>fname_lname</code>, email: <code>fname_lname@sy</code><br>
+          - <strong>LDAP:</strong> Use your corporate credentials
+        </p>
+      </div>
+    </div>
+
+    <div class="helper-text">
+      Secure login powered by Answerly HR
+    </div>
+  </div>
+
+  <script>
+    function getCsrfToken() {
+      const activeForm = document.querySelector('.login-form.active');
+      if (activeForm) {
+        const tokenInput = activeForm.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (tokenInput) return tokenInput.value;
+      }
+      
+      const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (tokenInput) return tokenInput.value;
+      
+      console.error('CSRF token not found in HTML');
+      return '';
+    }
+
+    function switchTab(method) {
+      const hardcodedForm = document.getElementById('hardcodedForm');
+      const ldapForm = document.getElementById('ldapForm');
+      const tabs = document.querySelectorAll('.tab-btn');
+      
+      if (method === 'hardcoded') {
+        hardcodedForm.classList.add('active');
+        ldapForm.classList.remove('active');
+        tabs[0].classList.add('active');
+        tabs[1].classList.remove('active');
+      } else {
+        hardcodedForm.classList.remove('active');
+        ldapForm.classList.add('active');
+        tabs[0].classList.remove('active');
+        tabs[1].classList.add('active');
+      }
+      
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.style.display = 'none';
+        el.previousElementSibling?.classList.remove('error');
+      });
+    }
+
+    function showError(fieldId, message) {
+      const errorElement = document.getElementById(fieldId + 'Error');
+      const inputElement = document.getElementById(fieldId);
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        inputElement?.classList.add('error');
+      }
+    }
+
+    function hideError(fieldId) {
+      const errorElement = document.getElementById(fieldId + 'Error');
+      const inputElement = document.getElementById(fieldId);
+      if (errorElement) {
+        errorElement.style.display = 'none';
+        inputElement?.classList.remove('error');
+      }
+    }
+
+    function showLoading(buttonId) {
+      const btn = document.getElementById(buttonId);
+      const spinner = btn.querySelector('.loading-spinner');
+      const text = btn.querySelector('span');
+      
+      spinner.style.display = 'block';
+      text.style.display = 'none';
+      btn.disabled = true;
+    }
+
+    function hideLoading(buttonId) {
+      const btn = document.getElementById(buttonId);
+      const spinner = btn.querySelector('.loading-spinner');
+      const text = btn.querySelector('span');
+      
+      spinner.style.display = 'none';
+      text.style.display = 'block';
+      btn.disabled = false;
+    }
+
+    document.getElementById('hardcodedForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      
+      hideError('username');
+      hideError('email');
+      
+      if (!username) {
+        showError('username', 'Username is required');
+        return;
+      }
+      if (!email) {
+        showError('email', 'Email is required');
+        return;
+      }
+      
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        showError('username', 'Security token missing. Please refresh the page.');
+        return;
+      }
+      
+      showLoading('hardcodedBtn');
+      
+      try {
+        const res = await fetch('/login/check/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ username, email, password: '' })
+        });
+        
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = data.next || '/';
+        } else {
+          hideLoading('hardcodedBtn');
+          showError('username', data.error || 'Invalid credentials');
+        }
+      } catch (error) {
+        hideLoading('hardcodedBtn');
+        showError('username', 'Network error. Please try again.');
+      }
+    });
+
+    document.getElementById('ldapForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('ldapUsername').value.trim();
+      const password = document.getElementById('ldapPassword').value;
+      const email = document.getElementById('ldapEmail').value.trim();
+      
+      hideError('ldapUsername');
+      hideError('ldapPassword');
+      
+      if (!username) {
+        showError('ldapUsername', 'LDAP username is required');
+        return;
+      }
+      if (!password) {
+        showError('ldapPassword', 'Password is required');
+        return;
+      }
+      
+      const csrfToken = getCsrfToken();
+      if (!csrfToken) {
+        showError('ldapUsername', 'Security token missing. Please refresh the page.');
+        return;
+      }
+      
+      showLoading('ldapBtn');
+      
+      try {
+        const res = await fetch('/login/check/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({ username, email, password })
+        });
+        
+        const data = await res.json();
+        if (data.ok) {
+          window.location.href = data.next || '/';
+        } else {
+          hideLoading('ldapBtn');
+          showError('ldapUsername', data.error || 'Invalid LDAP credentials');
+        }
+      } catch (error) {
+        hideLoading('ldapBtn');
+        showError('ldapUsername', 'Network error. Please try again.');
+      }
+    });
+
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', function() {
+        const fieldId = this.id;
+        hideError(fieldId);
+      });
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const demo = urlParams.get('demo');
+      
+      if (demo === 'hr') {
+        document.getElementById('username').value = 'hr';
+        document.getElementById('email').value = 'hr@sy';
+      } else if (demo === 'emp') {
+        document.getElementById('username').value = 'emp';
+        document.getElementById('email').value = 'emp@sy';
+      } else if (demo === 'ldap') {
+        switchTab('ldap');
+        document.getElementById('ldapUsername').value = 'testuser';
+        document.getElementById('ldapEmail').value = 'testuser@syriatel.com';
+      }
+    });
+  </script>
+</body>
+</html>
