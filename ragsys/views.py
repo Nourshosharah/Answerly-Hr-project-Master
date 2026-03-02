@@ -52,8 +52,8 @@ import logging
 # from .models import Feedback, ChatSession, ChatMessage
 
 forbidden_phrases = ["إن المعلومات المذكورة هنا هي ملكية خاصة لشركة سيريتل، ويجب ألاّ يتم استخدامها أو نسخها أو إظهارها إلا بتصريح مكتوب من المالك. يتعهد مستلم هذه المعلومات بالاحتفاظ بها واستخدامها، كما يوافق على حمايتها من الضياع، السرقة أو الاستخدام غير المسموح به.", 
-                     "THE INFORMATION CONTAINED HEREIN IS PROPRIETARY TO SYRIATEL, AND IT SHALL NOT BE USED, REPRODUCED\nOR DISCLOSED TO OTHERS EXCEPT AS SPECIFICALLY PERMITTED IN WRITING BY THE PROPRIETOR. THE RECIPIENT\nOF THIS INFORMATION, BY ITS RETENTION AND USE, AGREES TO PROTECT THE SAME FROM LOSS, THEFT OR\nUNAUTHORIZED USE.",
-                     "the information contained herein is proprietary to syriatel, and it shall not be used, reproduced\nor disclosed to others except as specifically permitted in writing by the proprietor. the recipient\nof this information, by its retention and use, agrees to protect the same from loss, theft or\nunauthorized use."]
+                     "THE INFORMATION CONTAINED HEREIN IS PROPRIETARY TO SYRIATEL, AND IT SHALL NOT BE USED, REPRODUCED\nOR DISCLOSED TO OTHERS EXCEPT AS SPECIFICALLY PERMITTED IN WRITING BY THE PROPRIETOR. THE RECIPIENT\nOF THIS INFORMATION, BY ITS RETENTION AND USE, AGREES TO PROTECT THE SAME FROM LOSS, THEFT OR\nUNAUTHORIZED USE",
+                     "the information contained herein is proprietary to syriatel, and it shall not be used, reproduced\nor disclosed to others except as specifically permitted in writing by the proprietor. the recipient\nof this information, by its retention and use, agrees to protect the same from loss, theft or\nunauthorized us."]
 
 
 session_idd=0
@@ -766,116 +766,339 @@ def trulens_dashboard(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 APPCFG = LoadConfig()
-# # forbidden_phrases = ["إن المعلومات المذكورة هنا هي ملكية خاصة لشركة سيريتل، ويجب ألاّ يتم استخدامها أو نسخها أو إظهارها إلا بتصريح مكتوب من المالك. يتعهد مستلم هذه المعلومات بالاحتماظ بها واستخدامها، كما يواقي على حمايتها من الضياع، السرقة أو الاستخدام غير المسموح به.","THE INFORMATION CONTAINED HEREIN IS PROPRIETARY TO SYRIATEL, AND IT SHALL NOT BE USED, REPRODUCED OR DISCLOSED TO OTHERS EXCEPT AS SPECIFICALLY PERMITTED IN WRITING BY THE PROPRIETOR. THE RECIPIENT
-# OF THIS INFORMATION, BY ITS RETENTION AND USE, AGREES TO PROTECT THE SAME FROM LOSS, THEFT OR
-# UNAUTHORIZED USE.",
-# "the information contained herein is proprietary to syriatel, and it shall not be used, reproduced
-# or disclosed to others except as specifically permitted in writing by the proprietor. the recipient
-# of this information, by its retention and use, agrees to protect the same from loss, theft or
-# unauthorized use."]
 
-# # -------------------------
-# # Page View (with HR check)
-# # -------------------------
-# def upload_and_add_page(request):
-#     user = request.session.get('user')
-#     if not user:
-#         return redirect('/login/')
-#     if user.get('role') != 'hr':
-#         return render(request, 'error.html', {
-#             'error': 'Access denied. HR role required.'
-#         }, status=403)
-#     return render(request, 'upload_and_add.html')
+# -------------------------
+# Page View (with HR check)
+# -------------------------
+def upload_and_add_page(request):
+    user = request.session.get('user')
+    if not user:
+        return redirect('/login/')
+    if user.get('role') != 'hr':
+        return render(request, 'error.html', {
+            'error': 'Access denied. HR role required.'
+        }, status=403)
+    return render(request, 'upload_and_add.html')
 
-# # -------------------------
-# # API View (with HR check)
-# # -------------------------
-# @require_http_methods(["POST"])
-# def upload_and_add(request):
-#     user = request.session.get('user')
-#     if not user:
-#         return JsonResponse({'error': 'Login required'}, status=403)
-#     if user.get('role') != 'hr':
-#         return JsonResponse({'error': 'HR role required to add documents.'}, status=403)
-#     pdf_file = request.FILES.get('pdf_file')
-#     if not pdf_file or not pdf_file.name.endswith('.pdf'):
-#         return JsonResponse({'error': 'Please upload a valid PDF file.'}, status=400)
-#     # Ensure the target directory exists
-#     os.makedirs(APPCFG.data_directory, exist_ok=True)
-#     try:
-#         # --- STEP 1: Save original file to APPCFG.data_directory ---
-#         safe_filename = os.path.basename(pdf_file.name)
-#         # Optional: prevent path traversal
-#         safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._- ")
-#         save_path = os.path.join(APPCFG.data_directory, safe_filename)
-#         # Avoid overwriting: add suffix if file exists
-#         counter = 1
-#         base, ext = os.path.splitext(safe_filename)
-#         while os.path.exists(save_path):
-#             safe_filename = f"{base}_{counter}{ext}"
-#             save_path = os.path.join(APPCFG.data_directory, safe_filename)
-#             counter += 1
-#         with open(save_path, 'wb+') as destination:
-#             for chunk in pdf_file.chunks():
-#                 destination.write(chunk)
-#         print(f"Saved uploaded PDF to: {save_path}")
-#         # --- STEP 2: Load and preprocess from the SAVED file ---
-#         loader = PyPDFLoader(save_path)
-#         raw_pages = loader.load()
-#         # Update metadata 'source' to point to the saved file (not temp)
-#         for doc in raw_pages:
-#             doc.metadata['source'] = save_path  # critical for reference links
-#         # --- STEP 3: Preprocessing (same as before) ---
-#         cleaned_pages = []
-#         for doc in raw_pages:
-#             new_content = doc.page_content
-#             removed_any = False
-#             for pattern in forbidden_patterns:
-#                 while pattern.search(new_content):
-#                     removed_any = True
-#                     new_content = pattern.sub('', new_content)
-#             if removed_any:
-#                 import re
-#                 new_content = re.sub(r'\n\s*\n\s*\n', '\n', new_content)
-#                 new_content = re.sub(r' +', ' ', new_content).strip()
-#             cleaned_pages.append(Document(page_content=new_content, metadata=doc.metadata))
-#         # Drop first page
-#         if cleaned_pages:
-#             cleaned_pages = cleaned_pages[1:]
-#         # Cut from 2nd "Related Documents"
-#         cut_from = None
-#         count = 0
-#         trigger_phrases = ["related documents", "الوثائق المتعلقة"]
-#         for idx, doc in enumerate(cleaned_pages):
-#             if any(trigger in doc.page_content.lower() for trigger in trigger_phrases):
-#                 count += 1
-#                 if count == 2:
-#                     cut_from = idx
-#                     break
-#         if cut_from is not None:
-#             cleaned_pages = cleaned_pages[:cut_from]
-#         # --- STEP 4: Add to existing vector DB ---
-#         if not os.path.exists(APPCFG.persist_directory):
-#             return JsonResponse({'error': 'VectorDB not initialized. Run initial ingestion first.'}, status=400)
-#         vectordb = Chroma(
-#             persist_directory=APPCFG.persist_directory,
-#             embedding_function=APPCFG.embedding_model,
-#         )
-#         non_empty = [doc for doc in cleaned_pages if doc.page_content.strip()]
-#         if not non_empty:
-#             return JsonResponse({'error': 'No valid content after cleaning.'}, status=400)
-#         ids = [str(uuid.uuid4()) for _ in non_empty]
-#         vectordb.add_documents(documents=non_empty, ids=ids)
-#         vectordb.persist()
-#         return JsonResponse({
-#             'success': True,
-#             'added_docs': len(non_empty),
-#             'saved_file': safe_filename
-#         })
-#     except Exception as e:
-#         import traceback
-#         print(traceback.format_exc())
-#         return JsonResponse({'error': str(e)}, status=500)
+# -------------------------
+# API View (with HR check)
+# -------------------------
+@require_http_methods(["POST"])
+def upload_and_add(request):
+    user = request.session.get('user')
+    if not user:
+        return JsonResponse({'error': 'Login required'}, status=403)
+    if user.get('role') != 'hr':
+        return JsonResponse({'error': 'HR role required to add documents.'}, status=403)
+    pdf_file = request.FILES.get('pdf_file')
+    if not pdf_file or not pdf_file.name.endswith('.pdf'):
+        return JsonResponse({'error': 'Please upload a valid PDF file.'}, status=400)
+    # Ensure the target directory exists
+    os.makedirs(APPCFG.data_directory, exist_ok=True)
+    try:
+        # --- STEP 1: Save original file to APPCFG.data_directory ---
+        safe_filename = os.path.basename(pdf_file.name)
+        # Optional: prevent path traversal
+        safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._- ")
+        save_path = os.path.join(APPCFG.data_directory, safe_filename)
+        # Avoid overwriting: add suffix if file exists
+        counter = 1
+        base, ext = os.path.splitext(safe_filename)
+        while os.path.exists(save_path):
+            safe_filename = f"{base}_{counter}{ext}"
+            save_path = os.path.join(APPCFG.data_directory, safe_filename)
+            counter += 1
+        with open(save_path, 'wb+') as destination:
+            for chunk in pdf_file.chunks():
+                destination.write(chunk)
+        print(f"Saved uploaded PDF to: {save_path}")
+        # --- STEP 2: Load and preprocess from the SAVED file ---
+        loader = PyPDFLoader(save_path)
+        raw_pages = loader.load()
+        # Update metadata 'source' to point to the saved file (not temp)
+        for doc in raw_pages:
+            doc.metadata['source'] = save_path  # critical for reference links
+        # --- STEP 3: Preprocessing (same as before) ---
+        cleaned_pages = []
+        for doc in raw_pages:
+            new_content = doc.page_content
+            removed_any = False
+            for pattern in forbidden_patterns:
+                while pattern.search(new_content):
+                    removed_any = True
+                    new_content = pattern.sub('', new_content)
+            if removed_any:
+                import re
+                new_content = re.sub(r'\n\s*\n\s*\n', '\n', new_content)
+                new_content = re.sub(r' +', ' ', new_content).strip()
+            cleaned_pages.append(Document(page_content=new_content, metadata=doc.metadata))
+        # Drop first page
+        if cleaned_pages:
+            cleaned_pages = cleaned_pages[1:]
+        # Cut from 2nd "Related Documents"
+        cut_from = None
+        count = 0
+        trigger_phrases = ["related documents", "الوثائق المتعلقة"]
+        for idx, doc in enumerate(cleaned_pages):
+            if any(trigger in doc.page_content.lower() for trigger in trigger_phrases):
+                count += 1
+                if count == 2:
+                    cut_from = idx
+                    break
+        if cut_from is not None:
+            cleaned_pages = cleaned_pages[:cut_from]
+        # --- STEP 4: Add to existing vector DB ---
+        if not os.path.exists(APPCFG.persist_directory):
+            return JsonResponse({'error': 'VectorDB not initialized. Run initial ingestion first.'}, status=400)
+        vectordb = Chroma(
+            persist_directory=APPCFG.persist_directory,
+            embedding_function=APPCFG.embedding_model,
+        )
+        non_empty = [doc for doc in cleaned_pages if doc.page_content.strip()]
+        if not non_empty:
+            return JsonResponse({'error': 'No valid content after cleaning.'}, status=400)
+        ids = [str(uuid.uuid4()) for _ in non_empty]
+        vectordb.add_documents(documents=non_empty, ids=ids)
+        vectordb.persist()
+        return JsonResponse({
+            'success': True,
+            'added_docs': len(non_empty),
+            'saved_file': safe_filename
+        })
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+
+# ============================================================================
+# NEW: Document Management Functions (Delete + List)
+# ============================================================================
+
+def get_vectordb_instance():
+    """Helper to get initialized ChromaDB instance"""
+    if not os.path.exists(APPCFG.persist_directory):
+        return None
+    return Chroma(
+        persist_directory=APPCFG.persist_directory,
+        embedding_function=APPCFG.embedding_model,
+    )
+
+@require_http_methods(["GET"])
+def list_documents(request):
+    """
+    List all unique documents in the vector database grouped by source file.
+    Returns document names, chunk counts, and metadata.
+    """
+    user = request.session.get('user')
+    if not user:
+        return JsonResponse({'error': 'Login required'}, status=403)
+    if user.get('role') != 'hr':
+        return JsonResponse({'error': 'HR role required.'}, status=403)
+    
+    try:
+        vectordb = get_vectordb_instance()
+        if not vectordb:
+            return JsonResponse({
+                'success': True,
+                'documents': [],
+                'total_chunks': 0,
+                'message': 'VectorDB not initialized yet.'
+            })
+        
+        # Get all documents with their metadata
+        # Note: Chroma doesn't have a direct "list all" method, so we use get() with empty filter
+        all_docs = vectordb.get(include=['metadatas', 'documents'])
+        
+        # Group by source file
+        documents_map = {}
+        total_chunks = 0
+        
+        if all_docs and 'metadatas' in all_docs:
+            for idx, metadata in enumerate(all_docs['metadatas']):
+                if metadata and 'source' in metadata:
+                    source = metadata['source']
+                    doc_id = all_docs['ids'][idx] if 'ids' in all_docs else None
+                    
+                    if source not in documents_map:
+                        documents_map[source] = {
+                            'filename': os.path.basename(source),
+                            'full_path': source,
+                            'chunk_count': 0,
+                            'ids': [],
+                            'page_numbers': set(),
+                            'uploaded_at': metadata.get('uploaded_at', 'Unknown')
+                        }
+                    
+                    documents_map[source]['chunk_count'] += 1
+                    documents_map[source]['ids'].append(doc_id)
+                    if 'page' in metadata:
+                        documents_map[source]['page_numbers'].add(metadata['page'])
+                    total_chunks += 1
+        
+        # Convert to list and format
+        documents_list = []
+        for source, info in documents_map.items():
+            documents_list.append({
+                'filename': info['filename'],
+                'full_path': info['full_path'],
+                'chunk_count': info['chunk_count'],
+                'page_count': len(info['page_numbers']),
+                'document_ids': info['ids'][:5] + ['...'] if len(info['ids']) > 5 else info['ids'],  # Show first 5 IDs only
+                'exists_on_disk': os.path.exists(source)
+            })
+        
+        # Sort by filename
+        documents_list.sort(key=lambda x: x['filename'])
+        
+        return JsonResponse({
+            'success': True,
+            'documents': documents_list,
+            'total_chunks': total_chunks,
+            'total_files': len(documents_list)
+        })
+        
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def delete_document(request):
+    """
+    Delete all chunks belonging to a specific document from ChromaDB.
+    Also optionally delete the source PDF file.
+    """
+    user = request.session.get('user')
+    if not user:
+        return JsonResponse({'error': 'Login required'}, status=403)
+    if user.get('role') != 'hr':
+        return JsonResponse({'error': 'HR role required.'}, status=403)
+    
+    try:
+        body = json.loads(request.body)
+        source_path = body.get('source_path')  # Full path to the document
+        filename = body.get('filename')  # Or just the filename
+        delete_file = body.get('delete_file', False)  # Whether to delete the PDF file too
+        
+        if not source_path and not filename:
+            return JsonResponse({'error': 'source_path or filename required'}, status=400)
+        
+        vectordb = get_vectordb_instance()
+        if not vectordb:
+            return JsonResponse({'error': 'VectorDB not initialized'}, status=400)
+        
+        # Determine the source path to filter by
+        if not source_path and filename:
+            # Find full path from filename
+            all_docs = vectordb.get(include=['metadatas'])
+            for idx, metadata in enumerate(all_docs.get('metadatas', [])):
+                if metadata and metadata.get('source', '').endswith(filename):
+                    source_path = metadata['source']
+                    break
+        
+        if not source_path:
+            return JsonResponse({'error': 'Document not found'}, status=404)
+        
+        # Get all document IDs with this source
+        all_docs = vectordb.get(
+            where={"source": source_path},
+            include=['metadatas']
+        )
+        
+        if not all_docs or 'ids' not in all_docs or not all_docs['ids']:
+            return JsonResponse({
+                'success': False,
+                'error': 'No chunks found for this document in VectorDB'
+            }, status=404)
+        
+        ids_to_delete = all_docs['ids']
+        
+        # Delete from ChromaDB
+        vectordb.delete(ids=ids_to_delete)
+        vectordb.persist()
+        
+        # Optionally delete the physical file
+        file_deleted = False
+        if delete_file and os.path.exists(source_path):
+            try:
+                os.remove(source_path)
+                file_deleted = True
+            except Exception as e:
+                print(f"Warning: Could not delete file {source_path}: {e}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Deleted {len(ids_to_delete)} chunks from VectorDB',
+            'deleted_chunks': len(ids_to_delete),
+            'source_path': source_path,
+            'file_deleted': file_deleted
+        })
+        
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_http_methods(["POST"])
+def delete_document_by_filter(request):
+    """
+    Alternative delete method using ChromaDB's where filter.
+    More efficient for large collections.
+    """
+    user = request.session.get('user')
+    if not user:
+        return JsonResponse({'error': 'Login required'}, status=403)
+    if user.get('role') != 'hr':
+        return JsonResponse({'error': 'HR role required.'}, status=403)
+    
+    try:
+        body = json.loads(request.body)
+        filename = body.get('filename')
+        delete_file = body.get('delete_file', True)
+        
+        if not filename:
+            return JsonResponse({'error': 'filename required'}, status=400)
+        
+        vectordb = get_vectordb_instance()
+        if not vectordb:
+            return JsonResponse({'error': 'VectorDB not initialized'}, status=400)
+        
+        # Find the full source path
+        all_docs = vectordb.get(include=['metadatas'])
+        source_path = None
+        
+        for metadata in all_docs.get('metadatas', []):
+            if metadata and filename in metadata.get('source', ''):
+                source_path = metadata['source']
+                break
+        
+        if not source_path:
+            return JsonResponse({'error': f'Document {filename} not found'}, status=404)
+        
+        # Delete using where filter (more efficient)
+        vectordb.delete(where={"source": source_path})
+        vectordb.persist()
+        
+        # Delete physical file
+        file_deleted = False
+        if delete_file and os.path.exists(source_path):
+            try:
+                os.remove(source_path)
+                file_deleted = True
+            except Exception as e:
+                print(f"Warning: Could not delete file: {e}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Deleted all chunks for {filename}',
+            'source_path': source_path,
+            'file_deleted': file_deleted
+        })
+        
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({'error': str(e)}, status=500)
 
 # ---------- 4. DATA TRIGGER ----------
 # views.py

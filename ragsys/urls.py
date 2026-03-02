@@ -23,8 +23,12 @@ urlpatterns = [
     path('data/status/', views.data_status_view, name='data_status'),
     path('data/status/api/', views.data_status_api, name='data_status_api'),
 
-    # path('upload-add/', views.upload_and_add_page, name='upload_and_add_page'),
-    # path('api/upload-add/', views.upload_and_add, name='upload_and_add'),
+    #path('upload-add/', views.upload_and_add_page, name='upload_and_add_page'),
+    #path('api/upload-add/', views.upload_and_add, name='upload_and_add'),
+    path('upload-and-add/', views.upload_and_add_page, name='upload_and_add_page'),
+    path('api/upload-and-add/', views.upload_and_add, name='upload_and_add'),
+    path('api/documents/', views.list_documents, name='list_documents'),
+    path('api/documents/delete/', views.delete_document_by_filter, name='delete_document'),
 
     #eval
     # path('api/chat/', views.api_chat, name='api_chat'),

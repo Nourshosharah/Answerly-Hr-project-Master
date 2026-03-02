@@ -1,6 +1,6 @@
 <!-- templates/upload_and_add.html -->
 {% extends "base.html" %}
-{% block title %}Add Document to Knowledge Base{% endblock %}
+{% block title %}Manage Knowledge Base Documents{% endblock %}
 {% block content %}
 
 <style>
@@ -26,7 +26,7 @@
 
   .upload-container {
     width: 100%;
-    max-width: 600px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 40px 20px;
   }
@@ -53,12 +53,52 @@
     font-size: 16px;
   }
 
-  .upload-card {
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tab:hover {
+    color: var(--text-primary);
+  }
+
+  .tab.active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .upload-card, .documents-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 32px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .documents-card {
+    padding: 24px;
   }
 
   .form-group {
@@ -156,6 +196,14 @@
     cursor: not-allowed;
   }
 
+  .submit-btn.danger {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+  }
+
+  .submit-btn.danger:hover:not(:disabled) {
+    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.3);
+  }
+
   .loading-spinner {
     width: 20px;
     height: 20px;
@@ -218,13 +266,246 @@
     color: var(--text-primary);
   }
 
+  /* Documents List Styles */
+  .documents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .documents-count {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .refresh-btn {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover {
+    background: var(--border);
+  }
+
+  .documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .document-item {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+
+  .document-item:hover {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .document-info {
+    flex: 1;
+  }
+
+  .document-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .document-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .document-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+
+  .status-synced {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .status-missing {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+  }
+
+  .document-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .btn-icon:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+  }
+
+  .btn-icon.view:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+
+  .modal-text {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .btn-secondary {
+    padding: 10px 20px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-danger {
+    padding: 10px 20px;
+    background: var(--danger);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-primary);
+  }
+
+  @media (max-width: 768px) {
+    .document-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .document-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
   @media (max-width: 480px) {
-    .upload-card {
-      padding: 24px;
+    .upload-card, .documents-card {
+      padding: 20px;
     }
 
     .page-title {
-      font-size: 24px;
+      font-size: 22px;
     }
   }
 </style>
@@ -238,48 +519,118 @@
         <line x1="12" y1="18" x2="12" y2="12"/>
         <line x1="9" y1="15" x2="15" y2="15"/>
       </svg>
-      Add PDF to Knowledge Base
+      Knowledge Base Manager
     </div>
-    <div class="page-subtitle">Upload and process PDF documents for vector search</div>
+    <div class="page-subtitle">Upload, view, and manage PDF documents in the vector database</div>
   </div>
 
-  <div class="upload-card">
-    <form id="uploadForm" enctype="multipart/form-data">
-      {% csrf_token %}
-      <div class="form-group">
-        <label>Select PDF file</label>
-        <div class="file-input-wrapper">
-          <div class="file-input" id="fileInputDisplay">
-            <span class="file-icon">📄</span>
-            <div class="file-text">Click to select or drag PDF file here</div>
-            <div class="file-name" id="fileName"></div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('upload')">
+      📤 Upload Document
+    </button>
+    <button class="tab" onclick="switchTab('documents')">
+      📚 Manage Documents
+    </button>
+  </div>
+
+  <!-- Upload Tab -->
+  <div id="upload-tab" class="tab-content active">
+    <div class="upload-card">
+      <form id="uploadForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Select PDF file</label>
+          <div class="file-input-wrapper">
+            <div class="file-input" id="fileInputDisplay">
+              <span class="file-icon">📄</span>
+              <div class="file-text">Click to select or drag PDF file here</div>
+              <div class="file-name" id="fileName"></div>
+            </div>
+            <input type="file" name="pdf_file" accept=".pdf" required id="pdfInput">
           </div>
-          <input type="file" name="pdf_file" accept=".pdf" required id="pdfInput">
         </div>
+
+        <button type="submit" id="uploadBtn" class="submit-btn">
+          <span id="btnText">Upload & Add to VectorDB</span>
+          <div class="loading-spinner" id="spinner"></div>
+        </button>
+      </form>
+
+      <div id="uploadResult" class="result-box">
+        <span id="uploadResultIcon"></span>
+        <span id="uploadResultText"></span>
       </div>
 
-      <button type="submit" id="uploadBtn" class="submit-btn">
-        <span id="btnText">Upload & Add to VectorDB</span>
-        <div class="loading-spinner" id="spinner"></div>
-      </button>
-    </form>
-
-    <div id="result" class="result-box">
-      <span id="resultIcon"></span>
-      <span id="resultText"></span>
+      <div class="info-box">
+        <p>
+          <strong>Supported Format:</strong> PDF files only<br>
+          <strong>Processing:</strong> Documents will be chunked and embedded for semantic search<br>
+          <strong>Note:</strong> Large files may take a few moments to process
+        </p>
+      </div>
     </div>
+  </div>
 
-    <div class="info-box">
-      <p>
-        <strong>Supported Format:</strong> PDF files only<br>
-        <strong>Processing:</strong> Documents will be chunked and embedded for semantic search<br>
-        <strong>Note:</strong> Large files may take a few moments to process
-      </p>
+  <!-- Documents Tab -->
+  <div id="documents-tab" class="tab-content">
+    <div class="documents-card">
+      <div class="documents-header">
+        <div>
+          <h3 style="color: var(--text-primary); margin-bottom: 4px;">Uploaded Documents</h3>
+          <div class="documents-count" id="docsCount">Loading...</div>
+        </div>
+        <button class="refresh-btn" onclick="loadDocuments()">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div id="documentsList" class="documents-list">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div>Loading documents...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-title">⚠️ Delete Document</div>
+    <div class="modal-text">
+      Are you sure you want to delete <strong id="deleteDocName"></strong>?
+      This will remove all its chunks from the vector database.
+    </div>
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="deleteFileCheck" checked>
+      <label for="deleteFileCheck">Also delete the original PDF file</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">Delete</button>
     </div>
   </div>
 </div>
 
 <script>
+let currentDeleteDoc = null;
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  
+  event.target.classList.add('active');
+  document.getElementById(tab + '-tab').classList.add('active');
+  
+  if (tab === 'documents') {
+    loadDocuments();
+  }
+}
+
+// File input handling
 document.getElementById('pdfInput').addEventListener('change', function(e) {
   const file = e.target.files[0];
   const display = document.getElementById('fileInputDisplay');
@@ -294,6 +645,7 @@ document.getElementById('pdfInput').addEventListener('change', function(e) {
   }
 });
 
+// Upload form handling
 document.getElementById('uploadForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -302,9 +654,9 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
   const btn = document.getElementById('uploadBtn');
   const btnText = document.getElementById('btnText');
   const spinner = document.getElementById('spinner');
-  const resultDiv = document.getElementById('result');
-  const resultIcon = document.getElementById('resultIcon');
-  const resultText = document.getElementById('resultText');
+  const resultDiv = document.getElementById('uploadResult');
+  const resultIcon = document.getElementById('uploadResultIcon');
+  const resultText = document.getElementById('uploadResultText');
 
   btn.disabled = true;
   btnText.style.display = 'none';
@@ -345,6 +697,138 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     spinner.style.display = 'none';
   }
 });
+
+// Load documents list
+async function loadDocuments() {
+  const listContainer = document.getElementById('documentsList');
+  const countContainer = document.getElementById('docsCount');
+  
+  listContainer.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">⏳</div>
+      <div>Loading documents...</div>
+    </div>
+  `;
+
+  try {
+    const resp = await fetch("{% url 'list_documents' %}");
+    const data = await resp.json();
+
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to load documents');
+    }
+
+    countContainer.textContent = `${data.total_files} files • ${data.total_chunks} total chunks`;
+
+    if (data.documents.length === 0) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div>No documents found in the knowledge base</div>
+          <div style="margin-top: 8px; font-size: 13px;">Upload your first PDF to get started</div>
+        </div>
+      `;
+      return;
+    }
+
+    listContainer.innerHTML = data.documents.map(doc => `
+      <div class="document-item">
+        <div class="document-info">
+          <div class="document-name">
+            📄 ${doc.filename}
+            <span class="document-status ${doc.exists_on_disk ? 'status-synced' : 'status-missing'}">
+              ${doc.exists_on_disk ? '✓ Synced' : '⚠ File Missing'}
+            </span>
+          </div>
+          <div class="document-meta">
+            ${doc.chunk_count} chunks • ${doc.page_count} pages • 
+            ${doc.exists_on_disk ? 'File on disk' : 'Only in DB'}
+          </div>
+        </div>
+        <div class="document-actions">
+          <button class="btn-icon view" onclick="viewDocument('${doc.full_path}')" title="View file">
+            👁
+          </button>
+          <button class="btn-icon" onclick="openDeleteModal('${doc.filename}', '${doc.full_path}')" title="Delete">
+            🗑
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+  } catch (err) {
+    listContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <div>Error loading documents</div>
+        <div style="margin-top: 8px; font-size: 13px;">${err.message}</div>
+      </div>
+    `;
+  }
+}
+
+// View document (if file exists)
+function viewDocument(path) {
+  // Open in new tab or show preview
+  window.open('/media/' + path.split('/').pop(), '_blank');
+}
+
+// Delete modal functions
+function openDeleteModal(filename, fullPath) {
+  currentDeleteDoc = { filename, fullPath };
+  document.getElementById('deleteDocName').textContent = filename;
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+  currentDeleteDoc = null;
+}
+
+async function confirmDelete() {
+  if (!currentDeleteDoc) return;
+
+  const deleteFile = document.getElementById('deleteFileCheck').checked;
+  
+  try {
+    const resp = await fetch("{% url 'delete_document' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+      },
+      body: JSON.stringify({
+        filename: currentDeleteDoc.filename,
+        delete_file: deleteFile
+      })
+    });
+
+    const data = await resp.json();
+
+    if (data.success) {
+      closeDeleteModal();
+      loadDocuments(); // Refresh the list
+      // Show success message
+      alert(`✅ ${data.message}`);
+    } else {
+      alert(`❌ Error: ${data.error}`);
+    }
+  } catch (err) {
+    alert(`❌ Network error: ${err.message}`);
+  }
+}
+
+// Close modal on outside click
+document.getElementById('deleteModal').addEventListener('click', (e) => {
+  if (e.target.id === 'deleteModal') {
+    closeDeleteModal();
+  }
+});
+
+// Load documents on page load if on documents tab
+if (document.querySelector('.tab.active').textContent.includes('Manage')) {
+  loadDocuments();
+}
 </script>
 
 {% endblock %}
